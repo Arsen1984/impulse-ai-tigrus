@@ -477,7 +477,7 @@ msg+='━━━━━━━━━━━━━━━━━━━━━━━━\n
 Object.keys(formData).forEach(k=>{msg+=k+': '+formData[k]+'\n'});
 msg+='━━━━━━━━━━━━━━━━━━━━━━━━\n';
 msg+='📅 '+new Date().toLocaleString('ru-RU');
-fetch('https://ntfy.sh/impulse-ai-tigrus-p84',{method:'POST',headers:{'Title':'Новая заявка: Диагностика ресторана','Priority':'high','Tags':'fork_and_knife,chart_with_upwards_trend'},body:msg})
+fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({access_key:'978beff9-3c07-4dff-b47f-81488b96bf7d',subject:'🍽️ Диагностика ресторана — '+formData['Заведение'],from_name:'IMPULSE AI',message:msg})})
 .then(r=>{console.log('Notification sent');alert('✅ Результаты отправлены!')}).catch(e=>{console.error('Send error:',e);alert('✅ Диагностика завершена!')});
 }
 function submitForm(){
