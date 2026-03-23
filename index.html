@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Диагностика готовности к ИИ | IMPULSE AI — Общепит</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a1a;--card:#12122a;--accent:#6366f1;--accent2:#818cf8;--green:#22c55e;--text:#e2e8f0;--muted:#94a3b8;--border:#1e293b;--danger:#ef4444;--orange:#f97316}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+.container{max-width:720px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:40px 20px 30px;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);border-radius:20px;margin-bottom:30px;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(99,102,241,0.1) 0%,transparent 50%);animation:pulse 4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.header h1{font-size:26px;font-weight:800;margin-bottom:8px;position:relative}
+.header .brand{color:var(--accent2);font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;position:relative}
+.header p{color:var(--muted);font-size:15px;max-width:500px;margin:0 auto;position:relative}
+.header .icon{font-size:48px;margin-bottom:16px;position:relative}
+.progress-bar{position:sticky;top:0;z-index:100;background:var(--bg);padding:12px 0;margin-bottom:20px}
+.progress-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:3px;transition:width 0.4s ease;width:0%}
+.progress-text{display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--muted)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px;transition:all 0.3s}
+.section.active{border-color:var(--accent);box-shadow:0 0 30px rgba(99,102,241,0.1)}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.section-num{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#4f46e5);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+.section-title{font-size:20px;font-weight:700}
+.section-desc{color:var(--muted);font-size:14px;margin-bottom:24px;padding-left:48px}
+.question{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.question:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.q-label{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px}
+.q-num{color:var(--accent2);font-weight:700;flex-shrink:0}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle}
+.badge.critical{background:rgba(239,68,68,0.15);color:var(--danger)}
+.badge.important{background:rgba(234,179,8,0.15);color:#eab308}
+.badge.estimate{background:rgba(99,102,241,0.15);color:var(--accent2)}
+.options{display:flex;flex-direction:column;gap:8px}
+.option{position:relative}
+.option input{position:absolute;opacity:0;pointer-events:none}
+.option label{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.2s;font-size:14px}
+.option label:hover{background:rgba(99,102,241,0.05);border-color:rgba(99,102,241,0.3)}
+.option input:checked+label{background:rgba(99,102,241,0.1);border-color:var(--accent);color:#fff}
+.option .radio{width:20px;height:20px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.option .checkbox{width:20px;height:20px;border:2px solid var(--border);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.option input:checked+label .radio{border-color:var(--accent);background:var(--accent)}
+.option input:checked+label .radio::after{content:'';width:8px;height:8px;border-radius:50%;background:#fff}
+.option input:checked+label .checkbox{border-color:var(--accent);background:var(--accent)}
+.option input:checked+label .checkbox::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
+.text-input{width:100%;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit;transition:all 0.2s}
+.text-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,0.15)}
+.text-input::placeholder{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 32px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#4f46e5);color:#fff;width:100%}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(99,102,241,0.3)}
+.btn-primary:active{transform:translateY(0)}
+.btn-nav{background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border)}
+.btn-nav:hover{background:rgba(255,255,255,0.1)}
+.nav-buttons{display:flex;gap:12px;margin-top:24px}
+.nav-buttons .btn{flex:1}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.contact-grid{grid-template-columns:1fr}}
+.result-screen{display:none;text-align:center;padding:40px 20px}
+.result-screen.show{display:block}
+.result-score{font-size:48px;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.result-label{color:var(--muted);font-size:14px;margin-bottom:30px}
+.result-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:30px}
+@media(max-width:500px){.result-cards{grid-template-columns:1fr}}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.result-card .val{font-size:24px;font-weight:700;color:var(--accent2)}
+.result-card .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.result-detail{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:left;margin-bottom:24px}
+.result-detail h3{margin-bottom:16px;font-size:18px}
+.result-detail ul{list-style:none;padding:0}
+.result-detail li{padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;justify-content:space-between}
+.result-detail li:last-child{border-bottom:none}
+.score-high{color:var(--green)}
+.score-mid{color:#eab308}
+.score-low{color:var(--danger)}
+.cta-box{background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:30px;margin-top:24px}
+.cta-box h3{margin-bottom:8px}
+.cta-box p{color:var(--muted);font-size:14px;margin-bottom:16px}
+.hidden{display:none}
+.tg-link{display:inline-flex;align-items:center;gap:8px;color:var(--accent2);text-decoration:none;font-weight:600;font-size:16px}
+.tg-link:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="icon">🍽️</div>
+    <div class="brand">IMPULSE AI</div>
+    <h1>Диагностика ресторана</h1>
+    <p>Определим, какие процессы вашего заведения получат максимальную выгоду от ИИ-автоматизации</p>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text"><span id="progressLabel">Блок 0 из 7</span><span id="progressPct">0%</span></div>
+  </div>
+
+  <!-- Block 0: О заведении -->
+  <div class="section active" data-step="0" id="step0">
+    <div class="section-header"><div class="section-num">📋</div><div class="section-title">О вашем заведении</div></div>
+    <div class="section-desc">Основная информация</div>
+    <div class="contact-grid">
+      <div><input class="text-input" type="text" name="company" placeholder="Название заведения"></div>
+      <div><input class="text-input" type="text" name="contact_name" placeholder="Контактное лицо"></div>
+      <div><input class="text-input" type="text" name="employees" placeholder="Кол-во сотрудников"></div>
+      <div><input class="text-input" type="text" name="venues" placeholder="Кол-во точек/залов"></div>
+      <div><input class="text-input" type="text" name="city" placeholder="Город"></div>
+      <div><input class="text-input" type="tel" name="phone" placeholder="Телефон или Telegram"></div>
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="nextStep()">Начать диагностику →</button></div>
+  </div>
+
+  <!-- Block 1: Управление заказами и кухня -->
+  <div class="section hidden" data-step="1" id="step1">
+    <div class="section-header"><div class="section-num">1</div><div class="section-title">Управление заказами и кухня</div></div>
+    <div class="section-desc">Как принимаются и обрабатываются заказы</div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">1.1</span> Среднее количество заказов в день? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q1_1" id="q1_1a" value="1"><label for="q1_1a"><span class="radio"></span>До 50</label></div>
+        <div class="option"><input type="radio" name="q1_1" id="q1_1b" value="2"><label for="q1_1b"><span class="radio"></span>50–150</label></div>
+        <div class="option"><input type="radio" name="q1_1" id="q1_1c" value="3"><label for="q1_1c"><span class="radio"></span>150–400</label></div>
+        <div class="option"><input type="radio" name="q1_1" id="q1_1d" value="4"><label for="q1_1d"><span class="radio"></span>Более 400</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">1.2</span> Как принимаете заказы? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q1_2" id="q1_2a" value="1"><label for="q1_2a"><span class="radio"></span>POS-система + онлайн-заказы автоматически</label></div>
+        <div class="option"><input type="radio" name="q1_2" id="q1_2b" value="2"><label for="q1_2b"><span class="radio"></span>POS-система (iiko/R-Keeper/Poster)</label></div>
+        <div class="option"><input type="radio" name="q1_2" id="q1_2c" value="3"><label for="q1_2c"><span class="radio"></span>Официанты записывают вручную</label></div>
+        <div class="option"><input type="radio" name="q1_2" id="q1_2d" value="4"><label for="q1_2d"><span class="radio"></span>Устно / по памяти</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">1.3</span> Среднее время отдачи блюда? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q1_3" id="q1_3a" value="1"><label for="q1_3a"><span class="radio"></span>До 10 минут</label></div>
+        <div class="option"><input type="radio" name="q1_3" id="q1_3b" value="2"><label for="q1_3b"><span class="radio"></span>10–20 минут</label></div>
+        <div class="option"><input type="radio" name="q1_3" id="q1_3c" value="3"><label for="q1_3c"><span class="radio"></span>20–35 минут</label></div>
+        <div class="option"><input type="radio" name="q1_3" id="q1_3d" value="4"><label for="q1_3d"><span class="radio"></span>Более 35 минут / нестабильно</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">1.4</span> Процент возвратов / переделок блюд? <span class="badge important">ВАЖНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q1_4" id="q1_4a" value="1"><label for="q1_4a"><span class="radio"></span>Менее 1%</label></div>
+        <div class="option"><input type="radio" name="q1_4" id="q1_4b" value="2"><label for="q1_4b"><span class="radio"></span>1–3%</label></div>
+        <div class="option"><input type="radio" name="q1_4" id="q1_4c" value="3"><label for="q1_4c"><span class="radio"></span>3–7%</label></div>
+        <div class="option"><input type="radio" name="q1_4" id="q1_4d" value="4"><label for="q1_4d"><span class="radio"></span>Более 7%</label></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-nav" onclick="prevStep()">← Назад</button>
+      <button class="btn btn-primary" onclick="nextStep()">Далее →</button>
+    </div>
+  </div>
+
+  <!-- Block 2: Склад и закупки -->
+  <div class="section hidden" data-step="2" id="step2">
+    <div class="section-header"><div class="section-num">2</div><div class="section-title">Склад и закупки</div></div>
+    <div class="section-desc">Управление продуктами, поставщиками и остатками</div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">2.1</span> Как часто списываете просроченные продукты? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q2_1" id="q2_1a" value="1"><label for="q2_1a"><span class="radio"></span>Почти никогда — точные закупки</label></div>
+        <div class="option"><input type="radio" name="q2_1" id="q2_1b" value="2"><label for="q2_1b"><span class="radio"></span>Иногда (до 3% от закупок)</label></div>
+        <div class="option"><input type="radio" name="q2_1" id="q2_1c" value="3"><label for="q2_1c"><span class="radio"></span>Регулярно (3–8%)</label></div>
+        <div class="option"><input type="radio" name="q2_1" id="q2_1d" value="4"><label for="q2_1d"><span class="radio"></span>Часто (более 8% — серьёзная проблема)</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">2.2</span> Как ведёте учёт остатков на складе? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q2_2" id="q2_2a" value="1"><label for="q2_2a"><span class="radio"></span>Автоматически через систему (iiko/1С/StoreHouse)</label></div>
+        <div class="option"><input type="radio" name="q2_2" id="q2_2b" value="2"><label for="q2_2b"><span class="radio"></span>В Excel / Google Sheets</label></div>
+        <div class="option"><input type="radio" name="q2_2" id="q2_2c" value="3"><label for="q2_2c"><span class="radio"></span>На бумаге / в тетради</label></div>
+        <div class="option"><input type="radio" name="q2_2" id="q2_2d" value="4"><label for="q2_2d"><span class="radio"></span>Не ведём — заказываем «на глаз»</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">2.3</span> Как планируете закупки? <span class="badge important">ВАЖНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q2_3" id="q2_3a" value="1"><label for="q2_3a"><span class="radio"></span>Автозаказ по остаткам + прогноз спроса</label></div>
+        <div class="option"><input type="radio" name="q2_3" id="q2_3b" value="2"><label for="q2_3b"><span class="radio"></span>По формулам/нормам из системы учёта</label></div>
+        <div class="option"><input type="radio" name="q2_3" id="q2_3c" value="3"><label for="q2_3c"><span class="radio"></span>Шеф-повар решает по опыту</label></div>
+        <div class="option"><input type="radio" name="q2_3" id="q2_3d" value="4"><label for="q2_3d"><span class="radio"></span>Когда закончилось — тогда заказываем</label></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-nav" onclick="prevStep()">← Назад</button>
+      <button class="btn btn-primary" onclick="nextStep()">Далее →</button>
+    </div>
+  </div>
+
+  <!-- Block 3: Персонал и смены -->
+  <div class="section hidden" data-step="3" id="step3">
+    <div class="section-header"><div class="section-num">3</div><div class="section-title">Персонал и смены</div></div>
+    <div class="section-desc">Управление командой и расписанием</div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">3.1</span> Текучка персонала? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q3_1" id="q3_1a" value="1"><label for="q3_1a"><span class="radio"></span>Низкая — команда стабильная</label></div>
+        <div class="option"><input type="radio" name="q3_1" id="q3_1b" value="2"><label for="q3_1b"><span class="radio"></span>Умеренная (20–40% в год)</label></div>
+        <div class="option"><input type="radio" name="q3_1" id="q3_1c" value="3"><label for="q3_1c"><span class="radio"></span>Высокая (40–70% в год)</label></div>
+        <div class="option"><input type="radio" name="q3_1" id="q3_1d" value="4"><label for="q3_1d"><span class="radio"></span>Критическая (более 70% — постоянно ищем людей)</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">3.2</span> Как составляете расписание смен? <span class="badge important">ВАЖНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q3_2" id="q3_2a" value="1"><label for="q3_2a"><span class="radio"></span>Автоматически (система учитывает загрузку)</label></div>
+        <div class="option"><input type="radio" name="q3_2" id="q3_2b" value="2"><label for="q3_2b"><span class="radio"></span>В Excel / Google Sheets</label></div>
+        <div class="option"><input type="radio" name="q3_2" id="q3_2c" value="3"><label for="q3_2c"><span class="radio"></span>Менеджер составляет вручную</label></div>
+        <div class="option"><input type="radio" name="q3_2" id="q3_2d" value="4"><label for="q3_2d"><span class="radio"></span>По звонку / «кто может — тот выходит»</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">3.3</span> Как обучаете новых сотрудников? <span class="badge estimate">ОЦЕНКА</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q3_3" id="q3_3a" value="1"><label for="q3_3a"><span class="radio"></span>Есть система обучения (видео, чек-листы, наставники)</label></div>
+        <div class="option"><input type="radio" name="q3_3" id="q3_3b" value="2"><label for="q3_3b"><span class="radio"></span>Инструкции есть, но не всегда следуют</label></div>
+        <div class="option"><input type="radio" name="q3_3" id="q3_3c" value="3"><label for="q3_3c"><span class="radio"></span>Учатся у коллег на месте</label></div>
+        <div class="option"><input type="radio" name="q3_3" id="q3_3d" value="4"><label for="q3_3d"><span class="radio"></span>Никак — «разберёшься сам»</label></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-nav" onclick="prevStep()">← Назад</button>
+      <button class="btn btn-primary" onclick="nextStep()">Далее →</button>
+    </div>
+  </div>
+
+  <!-- Block 4: Гости и маркетинг -->
+  <div class="section hidden" data-step="4" id="step4">
+    <div class="section-header"><div class="section-num">4</div><div class="section-title">Гости и маркетинг</div></div>
+    <div class="section-desc">Привлечение и удержание гостей</div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">4.1</span> Откуда приходят гости? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q4_1" id="q4_1a" value="1"><label for="q4_1a"><span class="radio"></span>Онлайн (соцсети, агрегаторы, сайт) — более 50%</label></div>
+        <div class="option"><input type="radio" name="q4_1" id="q4_1b" value="2"><label for="q4_1b"><span class="radio"></span>Микс онлайн + сарафанное радио</label></div>
+        <div class="option"><input type="radio" name="q4_1" id="q4_1c" value="3"><label for="q4_1c"><span class="radio"></span>В основном сарафанное радио / проходимость</label></div>
+        <div class="option"><input type="radio" name="q4_1" id="q4_1d" value="4"><label for="q4_1d"><span class="radio"></span>Не знаем / не отслеживаем</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">4.2</span> Есть программа лояльности? <span class="badge important">ВАЖНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q4_2" id="q4_2a" value="1"><label for="q4_2a"><span class="radio"></span>Да, CRM + персональные предложения</label></div>
+        <div class="option"><input type="radio" name="q4_2" id="q4_2b" value="2"><label for="q4_2b"><span class="radio"></span>Да, скидочные/бонусные карты</label></div>
+        <div class="option"><input type="radio" name="q4_2" id="q4_2c" value="3"><label for="q4_2c"><span class="radio"></span>Только скидки постоянным на словах</label></div>
+        <div class="option"><input type="radio" name="q4_2" id="q4_2d" value="4"><label for="q4_2d"><span class="radio"></span>Нет программы лояльности</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">4.3</span> Работаете с отзывами? <span class="badge estimate">ОЦЕНКА</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q4_3" id="q4_3a" value="1"><label for="q4_3a"><span class="radio"></span>Мониторим все площадки, отвечаем на 100%</label></div>
+        <div class="option"><input type="radio" name="q4_3" id="q4_3b" value="2"><label for="q4_3b"><span class="radio"></span>Периодически проверяем и отвечаем</label></div>
+        <div class="option"><input type="radio" name="q4_3" id="q4_3c" value="3"><label for="q4_3c"><span class="radio"></span>Только на жалобы реагируем</label></div>
+        <div class="option"><input type="radio" name="q4_3" id="q4_3d" value="4"><label for="q4_3d"><span class="radio"></span>Не работаем с отзывами</label></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-nav" onclick="prevStep()">← Назад</button>
+      <button class="btn btn-primary" onclick="nextStep()">Далее →</button>
+    </div>
+  </div>
+
+  <!-- Block 5: Финансы и аналитика -->
+  <div class="section hidden" data-step="5" id="step5">
+    <div class="section-header"><div class="section-num">5</div><div class="section-title">Финансы и аналитика</div></div>
+    <div class="section-desc">Контроль себестоимости и прибыли</div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">5.1</span> Знаете реальную себестоимость каждого блюда? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q5_1" id="q5_1a" value="1"><label for="q5_1a"><span class="radio"></span>Да, считаем автоматически (тех. карты в системе)</label></div>
+        <div class="option"><input type="radio" name="q5_1" id="q5_1b" value="2"><label for="q5_1b"><span class="radio"></span>Да, считаем вручную (Excel)</label></div>
+        <div class="option"><input type="radio" name="q5_1" id="q5_1c" value="3"><label for="q5_1c"><span class="radio"></span>Примерно знаем по основным блюдам</label></div>
+        <div class="option"><input type="radio" name="q5_1" id="q5_1d" value="4"><label for="q5_1d"><span class="radio"></span>Не считаем себестоимость</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">5.2</span> Фудкост (доля продуктов в выручке)? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q5_2" id="q5_2a" value="1"><label for="q5_2a"><span class="radio"></span>Менее 25% — отлично</label></div>
+        <div class="option"><input type="radio" name="q5_2" id="q5_2b" value="2"><label for="q5_2b"><span class="radio"></span>25–30% — норма</label></div>
+        <div class="option"><input type="radio" name="q5_2" id="q5_2c" value="3"><label for="q5_2c"><span class="radio"></span>30–38% — выше нормы</label></div>
+        <div class="option"><input type="radio" name="q5_2" id="q5_2d" value="4"><label for="q5_2d"><span class="radio"></span>Более 38% / не знаем</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">5.3</span> Какие системы используете? <span class="badge estimate">ОЦЕНКА</span></div>
+      <div class="options">
+        <div class="option"><input type="checkbox" name="q5_3" id="q5_3a" value="iiko"><label for="q5_3a"><span class="checkbox"></span>iiko</label></div>
+        <div class="option"><input type="checkbox" name="q5_3" id="q5_3b" value="rkeeper"><label for="q5_3b"><span class="checkbox"></span>R-Keeper</label></div>
+        <div class="option"><input type="checkbox" name="q5_3" id="q5_3c" value="poster"><label for="q5_3c"><span class="checkbox"></span>Poster</label></div>
+        <div class="option"><input type="checkbox" name="q5_3" id="q5_3d" value="1c"><label for="q5_3d"><span class="checkbox"></span>1С / StoreHouse</label></div>
+        <div class="option"><input type="checkbox" name="q5_3" id="q5_3e" value="delivery"><label for="q5_3e"><span class="checkbox"></span>Агрегаторы доставки (Uzum Tezkor/Wolt и др.)</label></div>
+        <div class="option"><input type="checkbox" name="q5_3" id="q5_3f" value="crm"><label for="q5_3f"><span class="checkbox"></span>CRM / программа лояльности</label></div>
+        <div class="option"><input type="checkbox" name="q5_3" id="q5_3g" value="none"><label for="q5_3g"><span class="checkbox"></span>Ничего — только касса</label></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-nav" onclick="prevStep()">← Назад</button>
+      <button class="btn btn-primary" onclick="nextStep()">Далее →</button>
+    </div>
+  </div>
+
+  <!-- Block 6: Доставка и онлайн -->
+  <div class="section hidden" data-step="6" id="step6">
+    <div class="section-header"><div class="section-num">6</div><div class="section-title">Доставка и онлайн</div></div>
+    <div class="section-desc">Цифровые каналы продаж</div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">6.1</span> Доля доставки в общей выручке? <span class="badge critical">КРИТИЧНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q6_1" id="q6_1a" value="1"><label for="q6_1a"><span class="radio"></span>Нет доставки</label></div>
+        <div class="option"><input type="radio" name="q6_1" id="q6_1b" value="2"><label for="q6_1b"><span class="radio"></span>До 15%</label></div>
+        <div class="option"><input type="radio" name="q6_1" id="q6_1c" value="3"><label for="q6_1c"><span class="radio"></span>15–35%</label></div>
+        <div class="option"><input type="radio" name="q6_1" id="q6_1d" value="4"><label for="q6_1d"><span class="radio"></span>Более 35%</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">6.2</span> Есть свой сайт / приложение для заказа? <span class="badge important">ВАЖНО</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q6_2" id="q6_2a" value="1"><label for="q6_2a"><span class="radio"></span>Да, своё приложение + сайт</label></div>
+        <div class="option"><input type="radio" name="q6_2" id="q6_2b" value="2"><label for="q6_2b"><span class="radio"></span>Только через агрегаторы</label></div>
+        <div class="option"><input type="radio" name="q6_2" id="q6_2c" value="3"><label for="q6_2c"><span class="radio"></span>Заказы через WhatsApp / Telegram</label></div>
+        <div class="option"><input type="radio" name="q6_2" id="q6_2d" value="4"><label for="q6_2d"><span class="radio"></span>Нет онлайн-заказов</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">6.3</span> Средний чек? <span class="badge estimate">ОЦЕНКА</span></div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q6_3" id="q6_3a" value="1"><label for="q6_3a"><span class="radio"></span>До 100,000 сум</label></div>
+        <div class="option"><input type="radio" name="q6_3" id="q6_3b" value="2"><label for="q6_3b"><span class="radio"></span>100,000–250,000 сум</label></div>
+        <div class="option"><input type="radio" name="q6_3" id="q6_3c" value="3"><label for="q6_3c"><span class="radio"></span>250,000–500,000 сум</label></div>
+        <div class="option"><input type="radio" name="q6_3" id="q6_3d" value="4"><label for="q6_3d"><span class="radio"></span>Более 500,000 сум</label></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-nav" onclick="prevStep()">← Назад</button>
+      <button class="btn btn-primary" onclick="nextStep()">Далее →</button>
+    </div>
+  </div>
+
+  <!-- Block 7: Цели и приоритеты -->
+  <div class="section hidden" data-step="7" id="step7">
+    <div class="section-header"><div class="section-num">7</div><div class="section-title">Цели и приоритеты</div></div>
+    <div class="section-desc">Что хотите улучшить в первую очередь</div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">7.1</span> Что важнее всего автоматизировать? <span class="badge important">ВАЖНО</span></div>
+      <div class="options">
+        <div class="option"><input type="checkbox" name="q7_1" id="q7_1a" value="inventory"><label for="q7_1a"><span class="checkbox"></span>Учёт продуктов и закупки</label></div>
+        <div class="option"><input type="checkbox" name="q7_1" id="q7_1b" value="orders"><label for="q7_1b"><span class="checkbox"></span>Приём и обработка заказов</label></div>
+        <div class="option"><input type="checkbox" name="q7_1" id="q7_1c" value="marketing"><label for="q7_1c"><span class="checkbox"></span>Маркетинг и привлечение гостей</label></div>
+        <div class="option"><input type="checkbox" name="q7_1" id="q7_1d" value="staff"><label for="q7_1d"><span class="checkbox"></span>Управление персоналом и сменами</label></div>
+        <div class="option"><input type="checkbox" name="q7_1" id="q7_1e" value="finance"><label for="q7_1e"><span class="checkbox"></span>Финансовый контроль и аналитика</label></div>
+        <div class="option"><input type="checkbox" name="q7_1" id="q7_1f" value="delivery"><label for="q7_1f"><span class="checkbox"></span>Доставка и онлайн-продажи</label></div>
+        <div class="option"><input type="checkbox" name="q7_1" id="q7_1g" value="menu"><label for="q7_1g"><span class="checkbox"></span>Меню-инжиниринг и ценообразование</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">7.2</span> Когда хотите увидеть результат?</div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q7_2" id="q7_2a" value="4"><label for="q7_2a"><span class="radio"></span>Как можно скорее — горит!</label></div>
+        <div class="option"><input type="radio" name="q7_2" id="q7_2b" value="3"><label for="q7_2b"><span class="radio"></span>В ближайший месяц</label></div>
+        <div class="option"><input type="radio" name="q7_2" id="q7_2c" value="2"><label for="q7_2c"><span class="radio"></span>В ближайший квартал</label></div>
+        <div class="option"><input type="radio" name="q7_2" id="q7_2d" value="1"><label for="q7_2d"><span class="radio"></span>Пока изучаем варианты</label></div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label"><span class="q-num">7.3</span> Бюджет на внедрение?</div>
+      <div class="options">
+        <div class="option"><input type="radio" name="q7_3" id="q7_3a" value="1"><label for="q7_3a"><span class="radio"></span>Готовы инвестировать при понятном ROI</label></div>
+        <div class="option"><input type="radio" name="q7_3" id="q7_3b" value="2"><label for="q7_3b"><span class="radio"></span>Ограниченный бюджет — нужно обосновать</label></div>
+        <div class="option"><input type="radio" name="q7_3" id="q7_3c" value="3"><label for="q7_3c"><span class="radio"></span>Минимальный — только бесплатные решения</label></div>
+        <div class="option"><input type="radio" name="q7_3" id="q7_3d" value="4"><label for="q7_3d"><span class="radio"></span>Пока не определились</label></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-nav" onclick="prevStep()">← Назад</button>
+      <button class="btn btn-primary" onclick="submitForm()">🍽️ Получить результат</button>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-screen" id="resultScreen">
+    <div style="font-size:64px;margin-bottom:20px">🍽️</div>
+    <div class="result-score" id="resultScore">0</div>
+    <div class="result-label">Индекс готовности ресторана к ИИ из 100</div>
+
+    <div class="result-cards">
+      <div class="result-card"><div class="val" id="resSavings">—</div><div class="lbl">Потенциальная экономия / мес</div></div>
+      <div class="result-card"><div class="val" id="resPayback">—</div><div class="lbl">Срок окупаемости</div></div>
+      <div class="result-card"><div class="val" id="resLevel">—</div><div class="lbl">Уровень готовности</div></div>
+    </div>
+
+    <div class="result-detail">
+      <h3>Результаты по блокам</h3>
+      <ul id="blockScores"></ul>
+    </div>
+
+    <div class="cta-box">
+      <h3>🚀 Следующий шаг</h3>
+      <p>По результатам диагностики мы подготовим персональный план автоматизации вашего ресторана и предложим бесплатный 5-дневный пилот.</p>
+      <p><strong>Бесплатно. Без обязательств. Результат за 5 дней.</strong></p>
+      <a class="tg-link" href="https://t.me/P84arsen" target="_blank">💬 Написать в Telegram →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentStep=0;const totalSteps=8;
+function updateProgress(){const p=Math.round((currentStep/(totalSteps-1))*100);document.getElementById('progressFill').style.width=p+'%';document.getElementById('progressLabel').textContent=`Блок ${currentStep} из ${totalSteps-1}`;document.getElementById('progressPct').textContent=p+'%'}
+function showStep(n){document.querySelectorAll('.section').forEach(s=>{s.classList.add('hidden');s.classList.remove('active')});const el=document.getElementById('step'+n);if(el){el.classList.remove('hidden');el.classList.add('active')}currentStep=n;updateProgress();window.scrollTo({top:0,behavior:'smooth'})}
+function nextStep(){if(currentStep<totalSteps-1)showStep(currentStep+1)}
+function prevStep(){if(currentStep>0)showStep(currentStep-1)}
+function gv(n){const e=document.querySelector(`input[name="${n}"]:checked`);return e?parseInt(e.value):0}
+function gc(n){return document.querySelectorAll(`input[name="${n}"]:checked`).length}
+function collectFormData(){
+const d={};
+d['Заведение']=document.querySelector('[name=company]')?.value||'—';
+d['Контактное лицо']=document.querySelector('[name=contact_name]')?.value||'—';
+d['Кол-во сотрудников']=document.querySelector('[name=employees]')?.value||'—';
+d['Кол-во точек']=document.querySelector('[name=venues]')?.value||'—';
+d['Город']=document.querySelector('[name=city]')?.value||'—';
+d['Телефон/Telegram']=document.querySelector('[name=phone]')?.value||'—';
+document.querySelectorAll('input[type=radio]:checked').forEach(r=>{
+const q=r.closest('.question');if(q){const lbl=q.querySelector('.q-label')?.textContent?.trim()||r.name;const ans=r.closest('.option')?.querySelector('label')?.textContent?.trim()||r.value;d[lbl]=ans}});
+const cbGroups={};
+document.querySelectorAll('input[type=checkbox]:checked').forEach(c=>{
+const q=c.closest('.question');if(q){const lbl=q.querySelector('.q-label')?.textContent?.trim()||c.name;const ans=c.closest('.option')?.querySelector('label')?.textContent?.trim()||c.value;if(!cbGroups[lbl])cbGroups[lbl]=[];cbGroups[lbl].push(ans)}});
+Object.keys(cbGroups).forEach(k=>{d[k]=cbGroups[k].join(', ')});
+return d;
+}
+function sendToEmail(formData,score,level,savings){
+let msg='🍽️ ДИАГНОСТИКА РЕСТОРАНА (общепит)\n';
+msg+='━━━━━━━━━━━━━━━━━━━━━━━━\n';
+msg+='📊 Индекс готовности: '+score+'/100\n';
+msg+='📈 Уровень: '+level+'\n';
+msg+='💰 Потенциальная экономия: '+savings+'\n';
+msg+='━━━━━━━━━━━━━━━━━━━━━━━━\n';
+Object.keys(formData).forEach(k=>{msg+=k+': '+formData[k]+'\n'});
+msg+='━━━━━━━━━━━━━━━━━━━━━━━━\n';
+msg+='📅 '+new Date().toLocaleString('ru-RU');
+fetch('https://ntfy.sh/impulse-ai-tigrus-p84',{method:'POST',headers:{'Title':'Новая заявка: Диагностика ресторана','Priority':'high','Tags':'fork_and_knife,chart_with_upwards_trend'},body:msg})
+.then(r=>{console.log('Notification sent');alert('✅ Результаты отправлены!')}).catch(e=>{console.error('Send error:',e);alert('✅ Диагностика завершена!')});
+}
+function submitForm(){
+const blocks=[
+{name:'Заказы и кухня',score:gv('q1_1')+gv('q1_2')+gv('q1_3')+gv('q1_4')},
+{name:'Склад и закупки',score:gv('q2_1')+gv('q2_2')+gv('q2_3')},
+{name:'Персонал и смены',score:gv('q3_1')+gv('q3_2')+gv('q3_3')},
+{name:'Гости и маркетинг',score:gv('q4_1')+gv('q4_2')+gv('q4_3')},
+{name:'Финансы и аналитика',score:gv('q5_1')+gv('q5_2')+Math.min(gc('q5_3'),4)},
+{name:'Доставка и онлайн',score:gv('q6_1')+gv('q6_2')+(gv('q6_3')>0?2:0)},
+{name:'Цели',score:Math.min(gc('q7_1'),4)+gv('q7_2')+(gv('q7_3')>0?2:0)}
+];
+const mx=[16,12,12,12,12,10,10];let ts=0,tm=0;
+const ul=document.getElementById('blockScores');ul.innerHTML='';
+blocks.forEach((b,i)=>{const p=Math.round((b.score/mx[i])*100);ts+=b.score;tm+=mx[i];const c=p>=70?'score-high':p>=40?'score-mid':'score-low';ul.innerHTML+=`<li>${b.name}<span class="${c}">${p}%</span></li>`});
+const fs=Math.round((ts/tm)*100);
+document.getElementById('resultScore').textContent=fs;
+const venues=parseInt(document.querySelector('[name=venues]')?.value)||1;
+const savings=Math.round(venues*15*0.2);
+const savingsText=savings>0?`~${savings} млн сум/мес`:'—';
+document.getElementById('resSavings').textContent=savings>0?`~${savings} млн`:'—';
+document.getElementById('resPayback').textContent=fs>=60?'2–4 нед.':fs>=30?'1–2 мес.':'2–3 мес.';
+const level=fs>=75?'🟢 Высокая':fs>=50?'🟡 Средняя':fs>=25?'🟠 Начальная':'🔴 Низкая';
+document.getElementById('resLevel').textContent=level;
+const formData=collectFormData();
+sendToEmail(formData,fs,level,savingsText);
+document.querySelectorAll('.section').forEach(s=>s.classList.add('hidden'));
+document.getElementById('resultScreen').classList.add('show');
+document.getElementById('progressFill').style.width='100%';
+document.getElementById('progressLabel').textContent='Диагностика завершена';
+document.getElementById('progressPct').textContent='100%';
+window.scrollTo({top:0,behavior:'smooth'})}
+updateProgress();
+</script>
+</body>
+</html>
